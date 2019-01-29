@@ -1,0 +1,21 @@
+{
+  "name": "ipbjns-now-src",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "build": "ncc build read-peer-pad.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "Jim Pick (@jimpick)",
+  "license": "MIT",
+  "dependencies": {
+    "bufferutil": "^4.0.1",
+    "peer-base": "0.12.0-rc4",
+    "utf-8-validate": "^5.0.2"
+  },
+  "devDependencies": {
+    "@zeit/ncc": "^0.13.0"
+  }
+}
