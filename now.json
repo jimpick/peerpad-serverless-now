@@ -1,0 +1,11 @@
+{
+  "version": 2,
+  "builds": [
+    { "src": "date.js", "use": "@now/node" },
+    { "src": "index.js", "use": "@now/node" }
+  ],
+  "routes": [
+    { "src": "/_date", "dest": "/date.js" },
+    { "src": "/.*", "dest": "/index.js" }
+  ]
+}
