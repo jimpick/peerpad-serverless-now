@@ -1,16 +1,13 @@
 {
-  "name": "ipbjns-now",
-  "version": "1.0.0",
-  "description": "",
+  "name": "peerpad-serverless-now",
+  "version": "0.0.1",
+  "description": "Deploy a read-only live PeerPad follower on Zeit",
   "main": "index.js",
   "scripts": {
     "rebuild": "node -v | grep v8 && (cd src; npm run build)",
-    "deploy": "test -n \"$URL\" && now -e URL=\"$URL\"",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "deploy": "test -n \"$URL\" && now -e URL=\"$URL\""
   },
   "keywords": [],
   "author": "Jim Pick (@jimpick)",
-  "license": "MIT",
-  "dependencies": {
-  }
+  "license": "MIT"
 }
