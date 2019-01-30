@@ -4,6 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
+    "publish": "(cd src; npm run build); now",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],

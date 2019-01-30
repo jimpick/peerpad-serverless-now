@@ -3,19 +3,44 @@ const IPFSRepo = require('ipfs-repo')
 const { MemoryDatastore } = require('interface-datastore')
 const url = require('url')
 
+let title
+let content
+let error
+
+let invocationCount = 0
+
+const ready = run()
+
 module.exports = (req, res) => {
+  ready
+    .then(() => {
+      if (error) {
+        res.end(error)
+      } else {
+        res.end(`Invocation: ${++invocationCount}\n\nTitle: ${title}\n\n${content}\n`)
+      }
+    })
+    .catch(err => {
+      res.end(err)
+    })
+}
+
+
+async function run () {
+  console.log('Running')
   const myURL = 'https://dev.peerpad.net/#/w/markdown/6nrKDJZcmREaq5avnr5pRZtoW8iaP3VdcdUQmWLQ9FJp/4XTTM8dzYTy4YvupugJ4cevorUjEnNtMUkC3B7NbzPiJTYDov-K3TgUVWssAaWNHS1NYEm8q12CuLymNJE2kCDvv6nEbSoW9Au161qPe4wUXXQD9syQbhkuM6b8LK77JsdBdN2LtvxjC21qnRtNGRrir8fixWpEXgxxhLkQQUGMLQwWMW2pJuK78Fr'
 
   const { hash } = url.parse(myURL)
   const [ _, name, publicKey ] = hash.match(/^#\/w\/markdown\/([^\/]+)\/([^-]+)/)
 
-  fetchPad(name, publicKey)
-    .then(([ title, content ]) => {  
-      res.end(`Title: ${title}\n\n${content}\n`)
+  await fetchPad(name, publicKey)
+    .then(() => {  
+      console.log('Fetched')
+      console.log(`Title: ${title}\n\n${content}\n`)
     })
     .catch(err => {
       console.error(err)
-      res.end(err.message)
+      error = err
     })
 }
 
@@ -53,37 +78,31 @@ async function fetchPad (name, publicKey) {
   const titleCollab = await collaboration.sub('title', 'rga')
 
   const fetchContent = () => new Promise(resolve => {
-    let content = collaboration.shared.value().join('')
-    if (content && content.length > 0) return resolve(content)
+    content = collaboration.shared.value().join('')
+    if (content && content.length > 0) return resolve()
     collaboration.on('state changed', checkContent)
 
     function checkContent () {
       content = collaboration.shared.value().join('')
-      if (content && content.length > 0) {
-        collaboration.removeListener('state changed', checkContent)
-        resolve(content)
-      }
+      console.log('Content updated, length:', content.length)
+      if (content && content.length > 0) resolve()
     }
   })
 
   const fetchTitle = () => new Promise(resolve => {
-    let title = titleCollab.shared.value().join('')
-    if (title && title.length > 0) return resolve(title)
+    title = titleCollab.shared.value().join('')
+    if (title && title.length > 0) return resolve()
     titleCollab.on('state changed', checkTitle)
 
     function checkTitle () {
       title = titleCollab.shared.value().join('')
-      if (title && title.length > 0) {
-        titleCollab.removeListener('state changed', checkTitle)
-        resolve(title)
-      }
+      console.log('Title updated:', title)
+      if (title && title.length > 0)  resolve()
     }
   })
 
   console.log('Fetching content...')
-  const content = await fetchContent()
+  await fetchContent()
   console.log('Fetching title...')
-  const title = await fetchTitle()
-
-  return [title, content]
+  await fetchTitle()
 }
