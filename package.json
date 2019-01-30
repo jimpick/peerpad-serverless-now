@@ -4,7 +4,8 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "publish": "(cd src; npm run build); now",
+    "rebuild": "node -v | grep v8 && (cd src; npm run build)",
+    "deploy": "test -n \"$URL\" && now -e URL=\"$URL\"",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],

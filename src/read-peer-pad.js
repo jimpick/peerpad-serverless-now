@@ -1,7 +1,11 @@
+const url = require('url')
 const PeerBase = require('peer-base')
 const IPFSRepo = require('ipfs-repo')
 const { MemoryDatastore } = require('interface-datastore')
-const url = require('url')
+const remark = require('remark')
+const remarkHtml = require('remark-html')
+const html = require('nanohtml')
+const raw = require('nanohtml/raw')
 
 let title
 let content
@@ -9,15 +13,41 @@ let error
 
 let invocationCount = 0
 
+if (!process.env.URL) {
+  console.error('URL environment variable not set!')
+  process.exit(1)
+}
+
 const ready = run()
 
 module.exports = (req, res) => {
   ready
     .then(() => {
+      console.log(req.url)
+      if (req.url === '/_stop') {
+        res.end('Stopping...')
+        setTimeout(() => process.exit(0), 1000)
+        return
+      }
       if (error) {
         res.end(error)
       } else {
-        res.end(`Invocation: ${++invocationCount}\n\nTitle: ${title}\n\n${content}\n`)
+        res.setHeader('X-Peer-Pad-Invocation-Count', `${++invocationCount}`)
+        remark()
+          .use(remarkHtml)
+          .process(content, (err, rendered) => {
+            const body = html`
+              <html>
+                <head>
+                  <title>${title}</title>
+                </head>
+                <body>
+                  ${err || raw(String(rendered))}
+                </body>
+              </html>
+            `
+            res.end(body.toString())
+          })
       }
     })
     .catch(err => {
@@ -27,10 +57,8 @@ module.exports = (req, res) => {
 
 
 async function run () {
-  console.log('Running')
-  const myURL = 'https://dev.peerpad.net/#/w/markdown/6nrKDJZcmREaq5avnr5pRZtoW8iaP3VdcdUQmWLQ9FJp/4XTTM8dzYTy4YvupugJ4cevorUjEnNtMUkC3B7NbzPiJTYDov-K3TgUVWssAaWNHS1NYEm8q12CuLymNJE2kCDvv6nEbSoW9Au161qPe4wUXXQD9syQbhkuM6b8LK77JsdBdN2LtvxjC21qnRtNGRrir8fixWpEXgxxhLkQQUGMLQwWMW2pJuK78Fr'
-
-  const { hash } = url.parse(myURL)
+  console.log('PeerPad URL:', process.env.URL)
+  const { hash } = url.parse(process.env.URL)
   const [ _, name, publicKey ] = hash.match(/^#\/w\/markdown\/([^\/]+)\/([^-]+)/)
 
   await fetchPad(name, publicKey)
@@ -97,7 +125,7 @@ async function fetchPad (name, publicKey) {
     function checkTitle () {
       title = titleCollab.shared.value().join('')
       console.log('Title updated:', title)
-      if (title && title.length > 0)  resolve()
+      if (title && title.length > 0) resolve()
     }
   })
 

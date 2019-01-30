@@ -4,15 +4,18 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "build": "ncc build read-peer-pad.js -o ../dist && cp ../dist/build/Release/* ../dist",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "patch-write-file-atomic": "rm -rf node_modules/write-file-atomic; cp -av ./write-file-atomic node_modules",
+    "build": "npm run patch-write-file-atomic && ncc build read-peer-pad.js -o ../dist && cp ../dist/build/Release/* ../dist"
   },
   "keywords": [],
   "author": "Jim Pick (@jimpick)",
   "license": "MIT",
   "dependencies": {
     "bufferutil": "^4.0.1",
+    "nanohtml": "^1.4.0",
     "peer-base": "0.12.0-rc4",
+    "remark": "^10.0.1",
+    "remark-html": "^9.0.0",
     "utf-8-validate": "^5.0.2"
   },
   "devDependencies": {
