@@ -9,7 +9,7 @@ module.exports = (req, res) => {
   const { hash } = url.parse(myURL)
   const [ _, name, publicKey ] = hash.match(/^#\/w\/markdown\/([^\/]+)\/([^-]+)/)
 
-  fetchPath(name, publicKey)
+  fetchPad(name, publicKey)
     .then(([ title, content ]) => {  
       res.end(`Title: ${title}\n\n${content}\n`)
     })
@@ -18,22 +18,6 @@ module.exports = (req, res) => {
       res.end(err.message)
     })
 }
-
-/*
-async function run () {
-  const { hash } = url.parse(myURL)
-  const [ _, name, publicKey ] = hash.match(/^#\/w\/markdown\/([^\/]+)\/([^-]+)/)
-
-  try {
-    const [ title, content ] = await fetchPad(name, publicKey)
-    console.log(`Title: ${title}\n\n${content}\n`)
-    process.exit(0)
-  } catch (e) {
-    console.error('Exception:', e)
-    process.exit(1)
-  }
-}
-*/
 
 async function fetchPad (name, publicKey) {
   const app = PeerBase('peer-pad/2', {
