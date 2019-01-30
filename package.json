@@ -5,7 +5,8 @@
   "main": "index.js",
   "scripts": {
     "rebuild": "node -v | grep v8 && (cd src; npm run build)",
-    "deploy": "test -n \"$URL\" && now -e URL=\"$URL\""
+    "check": "test -n \"$URL\" || echo \"URL environment variable not set\" || false",
+    "deploy": "npm run check && test -n \"$URL\" && now -e URL=\"$URL\""
   },
   "keywords": [],
   "author": "Jim Pick (@jimpick)",
